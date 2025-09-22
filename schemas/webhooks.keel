@@ -1,7 +1,7 @@
 model RechargeOrdersWebhook {
     fields {
         body Text
-        rechargeId ID? 
+        rechargeId ID? @unique
         status RechargeOrdersWebhookStatus @default(RechargeOrdersWebhookStatus.New)
         processedAt Timestamp?
         errorMessage Text?

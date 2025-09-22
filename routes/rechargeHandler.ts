@@ -1,13 +1,17 @@
-import { RouteFunction, models } from '@teamkeel/sdk';
+import { RouteFunction, models, useDatabase } from '@teamkeel/sdk';
 
 const handler: RouteFunction = async (request, ctx) => {
   try {
     const body = request.body ?? ''; // Handle empty body for webhook test method
-    const jsonBody = JSON.parse(body);
-  
+    const jsonBody = JSON.parse(body);  
     const rechargeId = jsonBody?.order?.id ?? null;
       
-    await models.rechargeOrdersWebhook.create({ body: body, rechargeId: rechargeId });
+     const db = useDatabase();
+      await db
+      .insertInto('recharge_orders_webhook')
+      .values({ body: body, rechargeId: rechargeId })
+      .onConflict(oc => oc.column('rechargeId').doNothing())
+      .execute();
     return {
       body: JSON.stringify({
         message: 'Webhook successfully received',
