@@ -23,22 +23,7 @@ export default ProcessRechargeOrdersWebhook(async (ctx, event) => {
     );
     return;
   }
-  // If webhook has already been received - mark this object as Duplicate
-  const existingWebhooks = await models.rechargeOrdersWebhook.findMany({
-    where: {
-      body: {
-        contains: `"id": ${rechargeId},`,
-      },
-    },
-  });
-  if (existingWebhooks?.length > 1) {
-    const errorMessage = 'Webhook already received';
-    await models.rechargeOrdersWebhook.update(
-      { id: event.target.data.id },
-      { status: RechargeOrdersWebhookStatus.Duplicate, errorMessage: errorMessage }
-    );
-    return;
-  }
+  
   // Attempt to upsert orders data
   try {
     await upsertOrders([order]);
