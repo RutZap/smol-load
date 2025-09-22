@@ -8,8 +8,7 @@ model RechargeOrdersWebhook {
 
     actions {
         get getRechargeWebhook(id)
-        list listRechargeWebhook()
-        //
+        list listRechargeWebhook() @orderBy(createdAt: desc)
         update updateStatus(id) with (status)
     }
 
