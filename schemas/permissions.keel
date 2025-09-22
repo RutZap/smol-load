@@ -1,0 +1,11 @@
+role Developer {
+    domains {
+        "keel.xyz"
+    }
+
+    emails {
+        "adrien@smolproducts.com"
+        "stephen@smolproducts.com"
+        "paul@smolproducts.com"
+    }
+}

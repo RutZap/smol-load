@@ -1,0 +1,328 @@
+model ProductImage {
+    fields {
+        product Product
+        small Text?
+        medium Text?
+        large Text?
+        original Text?
+        sortOrder Number?
+    }
+
+    actions {
+        create createProductImage() with (
+            product.id,
+            small?,
+            medium?,
+            large?,
+            original?,
+            sortOrder?,
+        )
+        get getProductImage(id)
+        list listProductImage()
+        list listProductImageByProduct(product.id)
+        update updateProductImage(id) with (
+            small?,
+            medium?,
+            large?,
+            original?,
+            sortOrder?,
+        )
+    }
+
+    @unique([product, sortOrder])
+
+    @permission(
+        expression: true,
+        actions: [create, list, get, update]
+    )
+}
+
+model ProductOptionValue {
+    fields {
+        productOption ProductOption
+        productVariantOptionValue ProductVariantOptionValue[]
+        label Text
+        position Number?
+    }
+
+    actions {
+        create createProductOptionValue() with (productOption.id, label, position?)
+        get getProductOptionValue(id)
+        list listProductOptionValue()
+        list listProductOptionValueByProductOption(productOption.id)
+        list listProductOptionValueByVariantOption(productVariantOptionValue.id)
+        update updateProductOptionValue(id) with (label?, position?)
+    }
+
+    @unique([productOption, label])
+
+    @permission(
+        expression: true,
+        actions: [create, list, get, update]
+    )
+}
+
+model ProductOption {
+    fields {
+        product Product
+        name Text
+        position Number
+        values ProductOptionValue[]
+    }
+
+    actions {
+        create createProductOption() with (product.id, name, position)
+        get getProductOption(id)
+        list listProductOption()
+        list listProductOptionByProduct(product.id)
+        update updateProductOption(id) with (name?, position?)
+    }
+
+    @unique([productId, name])
+
+    @permission(
+        expression: true,
+        actions: [create, list, get, update]
+    )
+}
+
+model ProductVariantOptionValue {
+    fields {
+        productVariant ProductVariant
+        productOptionValue ProductOptionValue
+    }
+
+    actions {
+        create createProductVariantOptionValue() with (
+            productVariant.id,
+            productOptionValue.id,
+        )
+        get getProductVariantOptionValue(id)
+        list listProductVariantOptionValue()
+        list listProductVariantOptionValueByVariant(productVariant.id)
+        list listProductVariantOptionValueByOptionValue(productOptionValue.id)
+    }
+
+    @unique([productVariant, productOptionValue])
+
+    @permission(
+        expression: true,
+        actions: [create, list, get, update]
+    )
+}
+
+model ProductVariant {
+    fields {
+        // Recharge data
+        sku Text?
+        externalVariantId Text @unique
+        product Product
+        rechargeWeight Decimal?
+        rechargeWeightUnit Text?
+        productVariantOptionValue ProductVariantOptionValue[]
+        requiresShipping Boolean
+        title Text
+        taxable Boolean
+        taxCode Text?
+        compareAtPrice Text?
+        unitPrice Text
+        smallImageUrl Text?
+        mediumImageUrl Text?
+        largeImageUrl Text?
+        originalImageUrl Text?
+        //
+        // External data:
+        // - Uploaded via json/csv 
+        // - All fields are optional as initial Recharge sync will leave these empty
+        //
+        typeId Text?
+        privateId ID?
+        privateVariantId ID?
+        name Text?
+        subscriptionType Text?
+        maxSubscriptionFrequency Number?
+        price Decimal?
+        subscriptionPrice Decimal?
+        image Text?
+        isEnabled Boolean?
+        isFreeTrial Boolean?
+        isLetterboxable Boolean?
+        isPhysical Boolean?
+        isPreOrder Boolean?
+        isVisibleInPortal Boolean?
+        packSize Decimal?
+        longName Text?
+        availabilityDependsOn Text?
+        upsellExclusions Text?
+        sortOrder Number?
+        commonName Text?
+        subscriptionUnit Text?
+        subscriptionProduct Text?
+        nextChargeDateDelayUnit Text?
+        upsellImage Text?
+        recommendedFrequencyDays Decimal?
+        impactPlastic Text?
+        collectiveSuffix Text?
+        descriptionAttributes Text?
+        displayReviews Boolean?
+        uri Text?
+        pdpFile Text?
+        capsuleQuantity Decimal?
+        impactChemicals Decimal?
+        impactDishwashWashes Decimal?
+        impactCarbonPerUnit Decimal?
+        impactMoneySavings Text?
+        equivalentProducts Text?
+        nextChargeDateDelay Decimal?
+        worthPrice Decimal?
+        delivery Decimal?
+        subscriptionPackSize Decimal?
+        impactDonatedWashes Decimal?
+        angledFlatLayImage Text?
+        packSizeDescriptions Text?
+        impactFats Decimal?
+        variantOptions Text?
+        variants Text?
+        spareParts Text?
+        impactLaundryWashes Decimal?
+        imageTwin Text?
+        isNewUntil Text?
+        isRefillProduct Boolean?
+        expireAfterCharges Number?
+        impactWater Decimal?
+        subProductOf Text?
+        upsellName Text?
+        buyAgain Boolean?
+        canPurchaseAgain Boolean?
+        isOutOfStockUntil Text?
+        bundleComponentProducts Text?
+        friendReferralSpecialOffer Text?
+        addons Text?
+        maxPurchaseAllowed Decimal?
+        subscriptionPerPackUsage Decimal?
+        isVisibleForSegments Text?
+        canBeSparePart Boolean?
+        //
+        // Shipping data:
+        // - Invetory synced from DC
+        // - Shipping data from DC but not API: See "assignDefaultProductShipping"
+        // - Should also be able to update manually
+        defaultShippingRate WhistlService?
+        barcode1 ID?
+        //@unique
+        barcode2 ID?
+        //@unique
+        barcode3 ID?
+        //@unique
+        barcode4 ID?
+        //@unique
+        barcode5 ID?
+        //@unique
+        // kg
+        weight Decimal?
+        // cm
+        height Decimal?
+        // cm
+        width Decimal?
+        // cm
+        length Decimal?
+    }
+
+    actions {
+        create createProductVariant() with (
+            externalVariantId,
+            product.id,
+            rechargeWeight,
+            rechargeWeightUnit,
+            requiresShipping,
+            sku,
+            title,
+            taxable,
+            taxCode?,
+            compareAtPrice?,
+            unitPrice,
+            smallImageUrl?,
+            mediumImageUrl?,
+            largeImageUrl?,
+            originalImageUrl?,
+        )
+        get getProductVariant(id)
+        list listProductVariant()
+        list listProductVariantByProduct(product.id)
+        update updateBarcodes(id) with (
+            barcode1?,
+            barcode2,
+            barcode3,
+            barcode4,
+            barcode5,
+        )
+        update updateSizeWeight(id) with (weight, height, width, length)
+        update updateProductVariant(id) with (
+            requiresShipping?,
+            sku?,
+            title?,
+            taxable?,
+            taxCode?,
+            compareAtPrice?,
+            unitPrice?,
+            smallImageUrl?,
+            mediumImageUrl?,
+            largeImageUrl?,
+            originalImageUrl?,
+        )
+    }
+
+    @permission(
+        expression: true,
+        actions: [create, list, get, update]
+    )
+}
+
+model Product {
+    fields {
+        title Text
+        description Text?
+        brand Text?
+        externalCreatedAt Text
+        externalProductId Text @unique
+        externalUpdatedAt Text
+        images ProductImage[]
+        options ProductOption[]
+        publishedAt Text
+        requiresShipping Boolean
+        variants ProductVariant[]
+        vendor Text
+    }
+
+    actions {
+        create createProduct() with (
+            brand?,
+            description?,
+            externalCreatedAt,
+            externalProductId,
+            externalUpdatedAt,
+            publishedAt,
+            requiresShipping,
+            title,
+            vendor,
+        )
+        get getProduct(id)
+        list listProduct()
+        update updateProduct(id) with (
+            brand?,
+            description?,
+            externalCreatedAt?,
+            externalProductId?,
+            externalUpdatedAt?,
+            publishedAt?,
+            requiresShipping?,
+            title?,
+            vendor?,
+        )
+    }
+
+    @permission(
+        expression: true,
+        actions: [create, list, get, update]
+    )
+}

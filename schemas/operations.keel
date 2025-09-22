@@ -1,0 +1,32 @@
+model FulfilmentCentre {
+    fields {
+        siteName Text
+        addressOne Text
+        addressTwo Text
+        addressCity Text
+        addressProvince Text
+        addressPostCode Text
+        addressCountryCode Text @default("GB")
+        contactPhone Text
+    }
+
+    actions {
+        list listFulfilmentCentre()
+        get getFulfilmentCentre(id)
+        create createFulfilmentCentre() with (
+            siteName,
+            addressOne,
+            addressTwo,
+            addressCity,
+            addressProvince,
+            addressPostCode,
+            addressCountryCode,
+            contactPhone,
+        )
+    }
+
+    @permission(
+        actions: [create, list, get, update],
+        expression: true
+    )
+}

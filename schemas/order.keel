@@ -1,0 +1,251 @@
+model Order {
+    fields {
+        rechargeId ID @unique
+        customerEmail Text?
+        customerRechargeId Text?
+        shippingAddressOne Text?
+        shippingAddressTwo Text?
+        shippingCity Text?
+        shippingCompany Text?
+        shippingCountryCode Text?
+        shippingFirstName Text?
+        shippingLastName Text?
+        shippingPhone Text?
+        shippingProvince Text?
+        shippingPostCode Text?
+        billingAddressOne Text?
+        billingAddressTwo Text?
+        billingCity Text?
+        billingCompany Text?
+        billingCountryCode Text?
+        billingFirstName Text?
+        billingLastName Text?
+        billingProvince Text?
+        billingPostCode Text?
+        paymentTotal Text?
+        paymentTax Text?
+        // paymentShipping Decimal
+        paymentMethod Text?
+        paymentReference Text?
+        paymentCurrency Text?
+        lineItems LineItem[]
+        metafields OrderMetafield[]
+        shippingCode Text?
+        shippingTitle Text?
+        shippingPrice Text?
+        status OrderStatus @default(OrderStatus.Processing)
+        fulfilmentCentre FulfilmentCentre?
+        parcelhubShipmentId ID? @unique
+        whistlService WhistlService?
+        label ShipmentLabel[]
+    }
+
+    actions {
+        create createOrder() with (
+            rechargeId,
+            customerRechargeId,
+            customerEmail,
+            shippingAddressOne,
+            shippingAddressTwo,
+            shippingCity,
+            shippingCompany?,
+            shippingCountryCode,
+            shippingFirstName,
+            shippingLastName,
+            shippingPhone,
+            shippingProvince,
+            shippingPostCode,
+            billingAddressOne,
+            billingAddressTwo,
+            billingCity,
+            billingCompany?,
+            billingCountryCode,
+            billingFirstName,
+            billingLastName,
+            billingProvince,
+            billingPostCode,
+            paymentTotal,
+            paymentTax,
+            // paymentShipping,
+            paymentMethod,
+            paymentReference,
+            paymentCurrency,
+            shippingCode,
+            shippingTitle,
+            shippingPrice,
+        )
+        get getOrder(id)
+        get getOrderByRechargeId(rechargeId)
+        get getOrderByShipmentId(parcelhubShipmentId)
+        list listOrders(customerEmail?, rechargeId?, shippingPostCode?)
+        list listOrdersToDispatch(customerEmail?, rechargeId?, shippingPostCode?) {
+            @where(order.status == OrderStatus.Processing || order.status == OrderStatus.Queued)
+            @orderBy(createdAt: asc)
+        }
+        list listDispatchedOrders(customerEmail?, rechargeId?, shippingPostCode?) {
+            @where(order.status == OrderStatus.Dispatched)
+            @orderBy(createdAt: desc)
+        }
+        update updateOrderStatus(id) with (status?)
+        update updateDeliveryAddress(id) with (
+            shippingFirstName?,
+            shippingLastName?,
+            shippingPhone?,
+            shippingCompany?,
+            shippingAddressOne?,
+            shippingAddressTwo?,
+            shippingCity?,
+            shippingCountryCode?,
+            shippingProvince?,
+            shippingPostCode?,
+        )
+        update placeOrderOnHold(id) {
+            @set(order.status = OrderStatus.OnHold)
+        }
+    }
+
+    @on(
+        [create],
+        createDispatchTask
+    )
+
+    @permission(
+        actions: [create, list, get, update],
+        expression: true
+    )
+}
+
+enum OrderStatus {
+    Processing
+    ReadyForDispatch
+    Dispatched
+    OnHold
+    // Recharge
+    Queued
+    Skipped
+    Cancelled
+    Fulfilled
+}
+
+model LineItem {
+    fields {
+        product Product?
+        productVariant ProductVariant?
+        order Order
+        purchaseItemId Text?
+        externalInventoryPolicy Text?
+        externalProductId ID
+        externalVariantId ID
+        grams Number?
+        originalPrice Text?
+        properties LineItemProperties[]
+        purchaseItemType PurchaseItemType?
+        quantity Number?
+        sku Text?
+        taxDue Text?
+        taxable Boolean?
+        taxableAmount Text?
+        title Text?
+        totalPrice Text?
+        unitPrice Text?
+        unitPriceIncludesTax Boolean?
+        variantTitle Text?
+        active Boolean @default(true)
+    }
+
+    actions {
+        create createLineItem() with (
+            order.id,
+            purchaseItemId,
+            externalInventoryPolicy,
+            externalProductId,
+            externalVariantId,
+            grams,
+            originalPrice,
+            properties.name,
+            properties.value,
+            purchaseItemType,
+            quantity,
+            sku,
+            taxDue,
+            taxable,
+            taxableAmount,
+            title,
+            totalPrice,
+            unitPrice,
+            unitPriceIncludesTax,
+            variantTitle,
+        )
+        get getLineItem(id)
+        list listLineItem()
+        list listLineItemByOrderId(order.id)
+        update updatePrice(id) with (
+            originalPrice?,
+            taxableAmount?,
+            totalPrice?,
+            unitPrice?,
+            unitPriceIncludesTax?,
+        )
+        delete deleteLineItem(id)
+    }
+
+    @unique([order, externalVariantId, purchaseItemId])
+
+    @permission(
+        actions: [create, list, get, update, delete],
+        expression: true
+    )
+}
+
+enum PurchaseItemType {
+    Subscription
+    Onetime
+}
+
+model LineItemProperties {
+    fields {
+        lineItem LineItem
+        name Text
+        value Text
+        active Boolean @default(true)
+    }
+
+    actions {
+        get getLineItemProperties(id)
+        list listLineItemProperties()
+        list listLineItemPropertiesByLineItem(lineItem.id)
+    }
+
+    @unique([lineItem, name])
+
+    @permission(
+        actions: [create, list, get, update],
+        expression: true
+    )
+}
+
+model OrderMetafield {
+    fields {
+        rechargeId Text @unique
+        rechargeCreatedAt Text
+        description Text
+        key Text
+        namespace Text
+        order Order
+        rechargeUpdatedAt Text
+        value Text
+        valueType Text
+        active Boolean @default(true)
+    }
+
+    actions {
+        get getOrderMetafield(id)
+        list listOrderMetafield()
+        list listOrderMetafieldByOrderId(order.id)
+    }
+
+    @permission(
+        actions: [list, get],
+        expression: true
+    )
+}

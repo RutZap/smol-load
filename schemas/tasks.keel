@@ -1,0 +1,40 @@
+model OrderTask {
+    fields {
+        type OrderTaskType
+        status OrderTaskStatus @default(OrderTaskStatus.Open)
+        order Order
+        assignedTo Identity?
+        assignedAt Timestamp?
+        resolvedBy Identity?
+        deferredUntil Timestamp
+        completedAt Timestamp?
+        errorMessage Text?
+    }
+
+    actions {
+        create createOrderTask() with (type, order.id, deferredUntil, status?)
+        get getOrderTask(id)
+        list listOrderTask(type) {
+            @orderBy(createdAt: asc)
+        }
+    }
+
+    @unique([type, orderId])
+
+    @permission(
+        actions: [create, list, get],
+        expression: true
+    )
+}
+
+enum OrderTaskType {
+    PickPackDispatch
+    SingleSkuDispatch
+}
+
+enum OrderTaskStatus {
+    Open
+    Assigned
+    Complete
+    Cancelled
+}

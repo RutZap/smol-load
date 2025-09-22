@@ -1,0 +1,42 @@
+model RechargeOrdersWebhook {
+    fields {
+        body Text
+        status RechargeOrdersWebhookStatus @default(RechargeOrdersWebhookStatus.New)
+        processedAt Timestamp?
+        errorMessage Text?
+    }
+
+    actions {
+        get getRechargeWebhook(id)
+        list listRechargeWebhook()
+        //
+        update updateStatus(id) with (status)
+    }
+
+    @on(
+        [create],
+        processRechargeOrdersWebhook
+    )
+
+    @on(
+        [update],
+        reProcessRechargeWebhookErrors
+    )
+
+    @permission(
+        actions: [list, get, update],
+        expression: true
+    )
+}
+
+enum RechargeOrdersWebhookStatus {
+    New
+    Processing
+    Processed
+    Duplicate
+    Error
+}
+
+routes {
+    post("/recharge/webhooks/orders", rechargeHandler)
+}

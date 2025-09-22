@@ -1,0 +1,26 @@
+job SyncOrderById {
+    inputs {
+        rechargeOrderId Text
+    }
+
+    @permission(expression: true)
+}
+
+job SyncWhistlServices {
+    @permission(expression: true)
+}
+
+job UpdateWhistlRefreshToken {
+    @permission(expression: true)
+    @schedule("0 16 * * *")
+}
+
+job RetryRechargeWebhookProcessing {
+    inputs {
+        timeFrom Timestamp
+        timeTo Timestamp
+        status RechargeOrdersWebhookStatus
+    }
+
+    @permission(expression: true)
+}

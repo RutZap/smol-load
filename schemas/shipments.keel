@@ -1,0 +1,69 @@
+model WhistlLabelSpec {
+    fields {
+        whistlService WhistlService
+        size Text
+        format Text
+    }
+
+    @unique([whistlService, size, format])
+}
+
+model WhistlService {
+    fields {
+        serviceProviderName Text?
+        serviceName Text?
+        serviceDescription Text?
+        serviceId ID
+        serviceCustomerUid ID @unique
+        serviceProviderId Text?
+        serviceCountryCodes Text[]
+        minWeight Decimal?
+        maxWeight Decimal?
+        minVolume Decimal?
+        maxVolume Decimal?
+        maxLength Decimal?
+        maxGirth Decimal?
+        multiPackages Boolean?
+        timedService Boolean?
+        weekendService Boolean?
+        businessAddresses Boolean?
+        residentialAddresses Boolean?
+        serviceOutOfArea Boolean?
+        labelSpecs WhistlLabelSpec[]
+        attributes Text?
+        availableDispatchSelection Boolean @default(false)
+        // availableEnhancements: Unused with Smol+Whistl
+    }
+
+    actions {
+        get getWhistlService(id)
+        list listWhistlService() @function
+    }
+
+    @permission(
+        expression: true,
+        actions: [list, get]
+    )
+}
+
+model ShipmentLabel {
+    fields {
+        order Order
+        size Text
+        format Text
+        courierTrackingNumber Text
+        imageFile File?
+        zplData Text?
+    }
+
+    actions {
+        get getShipmentLabel(id)
+        list listShipmentLabel()
+        list listShipmentLabelByOrderShipmentId(order.id)
+    }
+
+    @permission(
+        expression: true,
+        actions: [create, list, get, update]
+    )
+}

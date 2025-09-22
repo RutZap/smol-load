@@ -1,0 +1,13 @@
+model WhistlAuthTokens {
+    fields {
+        tokenType WhistlToken @unique
+        value Secret
+        expiresIn Number?
+        // Seconds until token expires
+    }
+}
+
+enum WhistlToken {
+    RefreshToken
+    AccessToken
+}
